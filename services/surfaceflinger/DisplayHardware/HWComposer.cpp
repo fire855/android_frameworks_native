@@ -946,6 +946,29 @@ void HWComposer::fbDump(String8& result) {
     }
 }
 
+int HWComposer::setParameter(uint32_t cmd,uint32_t value) {
+    if (mHwc) {
+    	int err;
+    	if( (cmd == HWC_LAYER_SETTOP) || (cmd == HWC_LAYER_SETBOTTOM) ) {
+			err = mHwc->setlayerorder(mHwc, mNumDisplays, mLists, cmd);
+		} else {
+			err = mHwc->setparameter(mHwc, cmd,value);
+		}
+        //int err = mHwc->setparameter(mHwc, cmd,value);
+        
+        return (status_t)err;
+    }
+    return NO_ERROR;
+}
+
+uint32_t HWComposer::getParameter(uint32_t cmd) {
+    if (mHwc) {
+        return mHwc->getparameter(mHwc, cmd);
+    }
+    
+    return NO_ERROR;
+}
+
 status_t HWComposer::setOutputBuffer(int32_t id, const sp<Fence>& acquireFence,
         const sp<GraphicBuffer>& buf) {
     if (uint32_t(id)>31 || !mAllocatedDisplayIDs.hasBit(id))
@@ -1395,7 +1418,7 @@ void HWComposer::dump(String8& result) const {
 }
 int HWComposer::setDisplayParameter(int cmd, int disp, int para0, int para1) const {
     if (mHwc) {
-        return mHwc->setParameter(mHwc, cmd, disp, para0, para1);
+        //return mHwc->setParameter(mHwc, cmd, disp, para0, para1);
     }
 
     return NO_INIT;

@@ -29,6 +29,7 @@
 
 #include <gui/IGraphicBufferAlloc.h>
 #include <gui/ISurfaceComposerClient.h>
+#include <gui/ISurfaceClient.h>
 
 namespace android {
 // ----------------------------------------------------------------------------
@@ -116,6 +117,11 @@ public:
     virtual int setDisplayParameter(const sp<IBinder>& display, int cmd, int para0,
             int para1, int para2) = 0;
 
+	virtual int      setDisplayProp(int cmd,int param0,int param1,int param2) = 0;
+    virtual int      getDisplayProp(int cmd,int param0,int param1) = 0;
+    virtual void     registerClient(const sp<ISurfaceClient>& client) = 0;
+	virtual void     unregisterClient() = 0;
+
     /* Capture the specified screen. requires READ_FRAME_BUFFER permission
      * This function will fail if there is a secure window on screen.
      */
@@ -147,6 +153,10 @@ public:
         CONNECT_DISPLAY,
         CAPTURE_SCREEN,
         SET_DISPLAY_PARAMETER,
+        SET_DISPLAYPROP,
+        GET_DISPLAYPROP,
+        REGISTER_CLIENT,
+        UNREGISTER_CLIENT,
     };
 
     virtual status_t onTransact(uint32_t code, const Parcel& data,

@@ -13,6 +13,7 @@ LOCAL_SRC_FILES:= \
 	GLConsumer.cpp \
 	GraphicBufferAlloc.cpp \
 	GuiConfig.cpp \
+	ISurfaceClient.cpp \
 	IDisplayEventConnection.cpp \
 	IGraphicBufferAlloc.cpp \
 	IGraphicBufferProducer.cpp \

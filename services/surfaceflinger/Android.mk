@@ -19,6 +19,8 @@ LOCAL_SRC_FILES:= \
     DisplayHardware/HWComposer.cpp \
     DisplayHardware/PowerHAL.cpp \
     DisplayHardware/VirtualDisplaySurface.cpp \
+    DisplayDispatcher.cpp \
+    DisplaySemaphore.cpp  \
     Effects/Daltonizer.cpp \
     EventLog/EventLogTags.logtags \
     EventLog/EventLog.cpp \
@@ -124,6 +126,8 @@ endif
     LOCAL_SHARED_LIBRARIES += libqdutils
     LOCAL_CFLAGS += -DQCOM_BSP
 endif
+
+LOCAL_C_INCLUDES += device/softwinner/907/hardware/include
 
 LOCAL_MODULE:= libsurfaceflinger
 

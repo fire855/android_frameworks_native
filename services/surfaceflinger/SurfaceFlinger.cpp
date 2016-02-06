@@ -3189,6 +3189,215 @@ int SurfaceFlinger::setDisplayParameter(const sp<IBinder>& display, int cmd,
     return hwc.setDisplayParameter(cmd, type, para0, para1);
 }
 
+int SurfaceFlinger::setDisplayParameter(uint32_t cmd,uint32_t  value)
+{
+	HWComposer& hwc(getHwComposer());
+    if (hwc.initCheck() == NO_ERROR) 
+    {
+    	if(cmd == HWC_LAYER_SETINITPARA)
+        {
+            //const DisplayHardware& hw(graphicPlane(0).displayHardware());
+			const sp<DisplayDevice>& hw(mDisplays[0]);
+            screen_para_t screen_para;
+            
+            screen_para.app_width[0] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,0,DISPLAY_APP_WIDTH,0);
+            screen_para.app_height[0] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,0,DISPLAY_APP_HEIGHT,0);
+            screen_para.width[0] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,0,DISPLAY_OUTPUT_WIDTH,0);
+            screen_para.height[0] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,0,DISPLAY_OUTPUT_HEIGHT,0);
+            screen_para.valid_width[0] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,0,DISPLAY_VALID_WIDTH,0);
+            screen_para.valid_height[0] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,0,DISPLAY_VALID_HEIGHT,0);
+            screen_para.app_width[1] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,1,DISPLAY_APP_WIDTH,0);
+            screen_para.app_height[1] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,1,DISPLAY_APP_HEIGHT,0);
+            screen_para.width[1] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,1,DISPLAY_OUTPUT_WIDTH,0);
+            screen_para.height[1] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,1,DISPLAY_OUTPUT_HEIGHT,0);
+            screen_para.valid_width[1] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,1,DISPLAY_VALID_WIDTH,0);
+            screen_para.valid_height[1] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,1,DISPLAY_VALID_HEIGHT,0);
+            hwc.setParameter(HWC_LAYER_SET_SCREEN_PARA,(unsigned int)&screen_para);
+            repaintEverything();
+        }
+        else if(cmd == HWC_LAYER_SETFRAMEPARA)
+        {
+            /*const Vector< sp<LayerBase> >& layers(mVisibleLayersSortedByZ);
+            const size_t count = layers.size();
+            
+            hwc.createWorkList(count);*/
+            hwc.prepare();
+        }
+		
+        return hwc.setParameter(cmd,value);
+    }
+
+    return NO_ERROR;
+}
+
+uint32_t SurfaceFlinger::getDisplayParameter(uint32_t cmd)
+{
+    HWComposer& hwc(getHwComposer());
+    if (hwc.initCheck() == NO_ERROR) 
+    {
+        return hwc.getParameter(cmd);
+    }
+
+    return NO_ERROR;
+}
+
+int SurfaceFlinger::setDisplayProp(int cmd,int param0,int param1,int param2)
+{
+    int ret = 0;
+    const sp<DisplayDevice>& hw(mDisplays[0]);
+    ret = hw->setDispProp(cmd,param0,param1,param2);
+    
+    if(cmd == DISPLAY_CMD_SETDISPMODE)
+    {
+        if(ret >= 0)
+        {
+             HWComposer& hwc(getHwComposer());
+             int hwc_mode = 0;
+
+			 screen_para_t screen_para;
+             
+             screen_para.app_width[0] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,0,DISPLAY_APP_WIDTH,0);
+             screen_para.app_height[0] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,0,DISPLAY_APP_HEIGHT,0);
+             screen_para.width[0] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,0,DISPLAY_OUTPUT_WIDTH,0);
+             screen_para.height[0] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,0,DISPLAY_OUTPUT_HEIGHT,0);
+             screen_para.valid_width[0] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,0,DISPLAY_VALID_WIDTH,0);
+             screen_para.valid_height[0] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,0,DISPLAY_VALID_HEIGHT,0);
+             screen_para.app_width[1] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,1,DISPLAY_APP_WIDTH,0);
+             screen_para.app_height[1] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,1,DISPLAY_APP_HEIGHT,0);
+             screen_para.width[1] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,1,DISPLAY_OUTPUT_WIDTH,0);
+             screen_para.height[1] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,1,DISPLAY_OUTPUT_HEIGHT,0);
+             screen_para.valid_width[1] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,1,DISPLAY_VALID_WIDTH,0);
+             screen_para.valid_height[1] = hw->setDispProp(DISPLAY_CMD_GETDISPPARA,1,DISPLAY_VALID_HEIGHT,0);
+             hwc.setParameter(HWC_LAYER_SET_SCREEN_PARA,(unsigned int)&screen_para);
+			 
+             if((param0 == DISPLAY_MODE_SINGLE) || (param0 == DISPLAY_MODE_SINGLE_VAR_FE) || (param0 == DISPLAY_MODE_SINGLE_FB_VAR))
+             {
+                 hwc_mode = HWC_MODE_SCREEN0;
+             }
+             else if(param0 == DISPLAY_MODE_DUALSAME)
+             {
+                 hwc_mode = HWC_MODE_SCREEN0_TO_SCREEN1;
+             }
+             else if(param0 == DISPLAY_MODE_DUALSAME_TWO_VIDEO)
+             {
+                 hwc_mode = HWC_MODE_SCREEN0_AND_SCREEN1;
+             }
+             else if(param0 == DISPLAY_MODE_SINGLE_VAR_GPU)
+             {
+                hwc_mode = HWC_MODE_SCREEN0_GPU;
+             }
+             else
+             {
+                ALOGW("not supported display mode: %d in setDisplayProp", param0);
+                return -1;
+             }
+             hwc.setParameter(HWC_LAYER_SETMODE,hwc_mode);
+             repaintEverything();
+         }
+         else
+         {
+            return 0;
+         }
+    }
+    return ret;
+}
+
+int SurfaceFlinger::getDisplayProp(int cmd,int param0,int param1)
+{
+    const sp<DisplayDevice>& hw(mDisplays[0]);
+
+    return hw->getDispProp(cmd,param0,param1);
+}
+
+void SurfaceFlinger::registerClient(const sp<ISurfaceClient>& client)
+{
+    Mutex::Autolock _l(mClientLock);
+
+    int pid = IPCThreadState::self()->getCallingPid();
+    if (mNotificationClients.indexOfKey(pid) < 0) {
+        sp<NotificationClient> notificationClient = new NotificationClient(this,
+                                                                            client,
+                                                                            pid);
+        ALOGV("registerClient() client %p, pid %d", notificationClient.get(), pid);
+
+        mNotificationClients.add(pid, notificationClient);
+
+        sp<IBinder> binder = client->asBinder();
+        binder->linkToDeath(notificationClient);
+    }
+}
+
+void SurfaceFlinger::unregisterClient()
+{
+	Mutex::Autolock _l(mClientLock);
+
+	int pid = IPCThreadState::self()->getCallingPid();
+	int index = mNotificationClients.indexOfKey(pid);
+    if (index >= 0) 
+    {
+        sp <NotificationClient> client = mNotificationClients.valueFor(pid);
+        ALOGV("removeNotificationClient() %p, pid %d", client.get(), pid);
+        mNotificationClients.removeItem(pid);
+    }
+}
+
+
+void SurfaceFlinger::removeNotificationClient(pid_t pid)
+{
+    Mutex::Autolock _l(mClientLock);
+
+    int index = mNotificationClients.indexOfKey(pid);
+    if (index >= 0) 
+    {
+        sp <NotificationClient> client = mNotificationClients.valueFor(pid);
+        ALOGV("removeNotificationClient() %p, pid %d", client.get(), pid);
+        mNotificationClients.removeItem(pid);
+    }
+}
+
+// audioConfigChanged_l() must be called with AudioFlinger::mLock held
+void SurfaceFlinger::NotifyFramebufferChanged_l(int event, int displayno)
+{
+    size_t size = mNotificationClients.size();
+    for (size_t i = 0; i < size; i++) 
+    {
+        mNotificationClients.valueAt(i)->client()->notifyCallback(event, displayno, 0,0,0);
+    }
+}
+
+int  SurfaceFlinger::NotifyFBConverted_l(unsigned int addr1,unsigned int addr2,int bufid,int64_t proctime)
+{
+	size_t size = mNotificationClients.size();
+	ALOGV("mNotificationClients.size() is %d \n", size);
+    for (size_t i = 0; i < size; i++) 
+    {
+        mNotificationClients.valueAt(i)->client()->notifyCallback(SURFACECLIENT_MSG_CONVERTFB, addr1, addr2,bufid,proctime);
+    }
+    
+    return size;
+}
+
+SurfaceFlinger::NotificationClient::NotificationClient(const sp<SurfaceFlinger>& surfaceflinger,
+                                                     const sp<ISurfaceClient>& client,
+                                                     pid_t pid)
+    : mSurfaceFlinger(surfaceflinger), mPid(pid), mClient(client)
+{
+}
+
+SurfaceFlinger::NotificationClient::~NotificationClient()
+{
+    mClient.clear();
+}
+
+void SurfaceFlinger::NotificationClient::binderDied(const wp<IBinder>& who)
+{
+    ALOGD("SurfaceFlinger::NotificationClient::binderDied, pid %d", mPid);
+    sp<NotificationClient> keep(this);
+    {
+        mSurfaceFlinger->removeNotificationClient(mPid);
+    }
+}
+
 void SurfaceFlinger::renderScreenImplLocked(
         const sp<const DisplayDevice>& hw,
         uint32_t reqWidth, uint32_t reqHeight,

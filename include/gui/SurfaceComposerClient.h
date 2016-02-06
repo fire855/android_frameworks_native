@@ -32,6 +32,7 @@
 
 #include <gui/CpuConsumer.h>
 #include <gui/SurfaceControl.h>
+#include <gui/ISurfaceClient.h>
 
 namespace android {
 
@@ -152,6 +153,11 @@ public:
 // Set parameter
     static int setDisplayParameter(const sp<IBinder>& display, int cmd, int para0,
             int para1, int para2);
+
+    static int  setDisplayProp(int cmd,int param0,int param1,int param2);
+    static int  getDisplayProp(int cmd,int param0,int param1);
+    static void    registerSurfaceClient(const sp<ISurfaceClient>& client);
+    static void    unregisterSurfaceClient();
 
 private:
     virtual void onFirstRef();

@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+#include <hardware/hwcomposer.h>
 #include <hardware/hwcomposer_defs.h>
 
 #include <ui/Fence.h>
@@ -144,6 +145,9 @@ public:
     int fbPost(int32_t id, const sp<Fence>& acquireFence, const sp<GraphicBuffer>& buf);
     int fbCompositionComplete();
     void fbDump(String8& result);
+
+    int setParameter(uint32_t cmd,uint32_t value);
+    uint32_t getParameter(uint32_t cmd);
 
     // Set the output buffer and acquire fence for a virtual display.
     // Returns INVALID_OPERATION if id is not a virtual display.

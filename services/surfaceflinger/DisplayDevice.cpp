@@ -145,6 +145,8 @@ DisplayDevice::DisplayDevice(
 
     // initialize the display orientation transform.
     setProjection(panelOrientation, mViewport, mFrame);
+	
+	mDisplayDispatcher = new DisplayDispatcher(mFlinger);
 }
 
 DisplayDevice::~DisplayDevice() {
@@ -272,6 +274,9 @@ void DisplayDevice::swapBuffers(HWComposer& hwc) const {
 }
 
 void DisplayDevice::onSwapBuffersCompleted(HWComposer& hwc) const {
+    if (mDisplayDispatcher != NULL) {
+        mDisplayDispatcher->startSwapBuffer(0);
+    }
     if (hwc.initCheck() == NO_ERROR) {
         mDisplaySurface->onFrameCommitted();
     }
@@ -518,4 +523,20 @@ void DisplayDevice::dump(String8& result) const {
     String8 surfaceDump;
     mDisplaySurface->dump(surfaceDump);
     result.append(surfaceDump);
+}
+
+int DisplayDevice::setDispProp(int cmd,int param0,int param1,int param2) const {
+    if (mDisplayDispatcher != NULL) {
+        return mDisplayDispatcher->setDispProp(cmd,param0,param1,param2);
+    }
+
+    return  0;
+}
+
+int DisplayDevice::getDispProp(int cmd,int param0,int param1) const {
+    if (mDisplayDispatcher != NULL) {
+        return mDisplayDispatcher->getDispProp(cmd,param0,param1);
+    }
+    
+    return  0;
 }
